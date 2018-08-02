@@ -1,0 +1,51 @@
+Linux :  
+
+step 1: create folder structure "/mnt/exportbackup/01012017"
+
+step 2: give root permission to "/mnt/exportbackup/01012017"
+
+        # chmod 0777 -R /mnt/exportbackup/01012017
+
+step 3: create a rmanbackup_level0.sh
+
+        insert below code
+
+#! /bin/bash
+
+rman <<-EOT
+
+connect target /
+
+run
+
+{
+
+allocate channel c1 device type disk format '/mnt/exportbackup/01012017/fullbkp_%d_%u_%s';
+
+allocate channel c2 device type disk format '/mnt/exportbackup/01012017/fullbkp_%d_%u_%s';
+
+allocate channel c3 device type disk format '/mnt/exportbackup/01012017/fullbkp_%d_%u_%s';
+
+allocate channel c4 device type disk format '/mnt/exportbackup/01012017/fullbkp_%d_%u_%s';
+
+backup incremental level 0 as compressed backupset database tag='level0bkp';
+
+backup current controlfile format '/mnt/exportbackup/01012017/controllfile_%d_%u_%s_%T';
+
+backup spfile format '/mnt/exportbackup/01012017/%d_spfile_%u_%s_%T';
+
+release channel c1;
+
+release channel c2;
+
+release channel c3;
+
+release channel c4;
+
+}
+
+EOT
+
+Run the sh script in command line.
+
+[oracle@testdb ~]$nohup ./rman_level0.sh > /mnt/exportbackup/01012017/rman_level0.log 2>&1 &
